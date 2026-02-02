@@ -3,252 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رشة فودز | Rashe Foods - المتجر المتكامل</title>
+    <meta name="description" content="رشة فودز - أطيب وأجود أنواع التوابل والمأكولات المنزلية تصلك أينما كنت.">
+    <title>رشة فودز | RASHA FOODS - الطعم الأصلي</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQFsNibDEw5LjE7DDHvAmKsKTL3v4PnMM",
+            authDomain: "rasha--foods.firebaseapp.com",
+            databaseURL: "https://rasha--foods-default-rtdb.firebaseio.com",
+            projectId: "rasha--foods",
+            storageBucket: "rasha--foods.firebasestorage.app",
+            messagingSenderId: "868030346789",
+            appId: "1:868030346789:web:93d66ff48018e68e4c71cc",
+            measurementId: "G-WHZG01390N"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Global Firebase Tools
+        window.fb = { db, ref, set, push, onValue, remove };
+    </script>
+
     <style>
-        * { font-family: 'IBM Plex Sans Arabic', sans-serif; scroll-behavior: smooth; }
-        body { background: #000; color: white; overflow-x: hidden; }
+        * { font-family: 'IBM Plex Sans Arabic', sans-serif; transition: all 0.3s ease; }
+        body { background-color: #050505; color: #eee; margin: 0; overflow-x: hidden; }
         
-        .glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); }
-        .neon-orange { color: #ff9c00; text-shadow: 0 0 15px rgba(255, 156, 0, 0.4); }
-        
-        .btn-gradient { 
-            background: linear-gradient(90deg, #ff9c00, #e67e22); 
-            color: black; font-weight: 800; transition: 0.3s ease;
-        }
+        /* Glass & Neon Styles */
+        .glass { background: rgba(20, 20, 20, 0.75); backdrop-filter: blur(15px); border: 1px solid rgba(255, 156, 0, 0.1); }
+        .neon-orange { color: #ff9c00; text-shadow: 0 0 10px rgba(255, 156, 0, 0.3); }
+        .btn-premium { background: linear-gradient(135deg, #ff9c00 0%, #e67e22 100%); color: #000; font-weight: 800; border-radius: 16px; cursor: pointer; border: none; box-shadow: 0 4px 15px rgba(255, 156, 0, 0.2); }
+        .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 156, 0, 0.4); }
 
-        .product-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px; transition: 0.3s;
-        }
-        .product-card:hover { border-color: #ff9c00; transform: translateY(-5px); }
+        /* Pages System */
+        .page { display: none; min-height: 100vh; width: 100%; position: absolute; top: 0; left: 0; background: #050505; padding-top: 100px; padding-bottom: 50px; }
+        .active-page { display: flex !important; flex-direction: column; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        #orderModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        /* Inputs */
+        .input-group { position: relative; width: 100%; margin-bottom: 15px; }
+        .input-group i { position: absolute; right: 15px; top: 15px; color: #555; }
+        input { background: #111 !important; border: 1px solid #222 !important; color: white !important; padding: 12px 45px 12px 15px !important; border-radius: 14px; outline: none; width: 100%; }
+        input:focus { border-color: #ff9c00 !important; }
 
-        .modal-content {
-            background: #111;
-            border: 1px solid #ff9c00;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 30px;
-            max-height: 85vh;
-            overflow-y: auto;
+        /* Floating Cart */
+        #floating-cart {
+            position: fixed; bottom: 30px; left: 30px; width: 70px; height: 70px;
+            background: #ff9c00; border-radius: 22px; display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+            box-shadow: 0 10px 30px rgba(255, 156, 0, 0.4); animation: pulse 2s infinite;
         }
-
-        .cart-item {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 15px 0;
-        }
-
-        .cart-badge {
-            position: fixed; bottom: 30px; left: 30px; z-index: 100;
-            display: none; animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 156, 0, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 156, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 156, 0, 0); } }
     </style>
 </head>
 <body>
 
-    <nav class="fixed w-full z-50 glass py-4 px-6 border-b border-white/5">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="text-2xl font-black italic tracking-tighter uppercase">RASHE <span class="neon-orange text-3xl">رشة</span></div>
-            <a href="https://wa.me/201021407878" class="btn-gradient px-6 py-2 rounded-full text-xs">واتساب المبيعات</a>
+    <nav class="fixed top-0 w-full h-20 glass flex justify-between items-center px-8 z-[1100]">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg rotate-3">
+                <i class="fas fa-pepper-hot text-black -rotate-3"></i>
+            </div>
+            <span class="text-xl font-black italic tracking-tighter">RASHA <span class="neon-orange">FOODS</span></span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="showPage('adminLoginPage')" class="text-[10px] text-gray-600 hover:text-orange-500 underline">الإدارة</button>
+            <button id="logout-btn" onclick="logout()" class="hidden text-red-500 text-xs bg-red-500/10 px-3 py-1 rounded-full">خروج</button>
         </div>
     </nav>
 
-    <section class="pt-40 pb-16 px-6 text-center">
-        <h1 class="text-6xl md:text-8xl font-black mb-4 italic tracking-tighter uppercase">رشة <span class="neon-orange">فودز</span></h1>
-        <p class="text-gray-500 max-w-xl mx-auto text-lg">أفضل أنواع الخلطات والبهارات الطازجة. أضف ما تحتاجه للسلة وراجع طلبك قبل الإرسال.</p>
+    <div id="floating-cart" onclick="toggleCart(true)">
+        <i class="fas fa-shopping-basket text-black text-2xl"></i>
+        <span id="cart-badge" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-orange-500">0</span>
+    </div>
+
+    <section id="loginPage" class="page active-page items-center justify-center px-6">
+        <div class="w-full max-w-sm glass p-10 rounded-[45px] text-center shadow-2xl relative">
+            <div class="w-16 h-16 bg-orange-500/10 rounded-full blur-3xl absolute top-0 left-0"></div>
+            <h1 class="text-3xl font-black mb-2 italic">مرحباً بك في <span class="neon-orange">رشة</span></h1>
+            <p class="text-gray-500 text-[11px] mb-8 uppercase tracking-widest font-bold">تسجيل الدخول للمتجر</p>
+            
+            <div class="input-group"><i class="fas fa-phone-alt"></i><input type="tel" id="log-phone" placeholder="رقم الموبايل"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="log-pass" placeholder="كلمة السر"></div>
+            
+            <button onclick="handleLogin()" class="btn-premium w-full py-4 mt-4">دخول</button>
+            <button onclick="showPage('registerPage')" class="mt-8 text-sm neon-orange underline font-bold">إنشاء حساب جديد</button>
+        </div>
     </section>
 
-    <main class="max-w-7xl mx-auto px-6 pb-24">
-        
-        <h2 id="blends" class="text-2xl font-bold mb-8 border-r-4 border-[#ff9c00] pr-4">خلطات رشة فودز الخاصة</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20" id="blends-grid"></div>
+    <section id="registerPage" class="page items-center justify-center px-6">
+        <div class="w-full max-w-sm glass p-10 rounded-[45px] text-center shadow-2xl">
+            <h2 class="text-2xl font-black mb-6 neon-orange italic">إنضم إلينا</h2>
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="reg-name" placeholder="الاسم الكامل"></div>
+            <div class="input-group"><i class="fas fa-phone-alt"></i><input type="tel" id="reg-phone" placeholder="رقم الموبايل"></div>
+            <div class="input-group"><i class="fas fa-map-marker-alt"></i><input type="text" id="reg-address" placeholder="العنوان بالتفصيل"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="reg-pass" placeholder="كلمة السر"></div>
+            <button onclick="handleRegister()" class="btn-premium w-full py-4 mt-4">تأكيد التسجيل</button>
+            <button onclick="showPage('loginPage')" class="mt-6 text-xs text-gray-500 underline">لديك حساب؟ سجل دخولك</button>
+        </div>
+    </section>
 
-        <h2 id="spices" class="text-2xl font-bold mb-8 border-r-4 border-white pr-4">التوابل والبهارات المفردة</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20" id="spices-grid"></div>
-        
-        <section id="wholesale" class="glass p-8 md:p-16 rounded-[40px] border-2 border-[#ff9c00]/30 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-[#ff9c00] opacity-5 blur-[100px]"></div>
-            <h2 class="text-4xl font-black mb-4 italic uppercase leading-none">إستاند رشة فودز <br> <span class="neon-orange">الورقي</span></h2>
-            <div class="flex gap-4 mb-8 text-xs text-gray-400 font-bold uppercase tracking-widest">
-                <span>25 عبوة</span> <span>|</span> <span>وزن 40 جم</span> <span>|</span> <span>5 أصناف</span>
+    <section id="storePage" class="page px-6">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="mb-10 text-right">
+                <h2 id="welcome-msg" class="text-2xl font-bold italic">قائمة <span class="neon-orange">المنتجات</span></h2>
+                <p class="text-xs text-gray-500 mt-1">اختر أجود المكونات لوجباتك</p>
             </div>
-            <p class="text-gray-400 mb-2 text-sm">اكتب الـ 5 أصناف المطلوبة للإستاند:</p>
-            <textarea id="stand-input" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 mb-6 outline-none focus:border-[#ff9c00]" placeholder="مثال: دجاج، لحم، شاورما، حواوشي، كفتة"></textarea>
-            <button onclick="orderStand()" class="btn-gradient px-12 py-4 rounded-xl text-lg w-full md:w-auto">طلب الإستاند الآن</button>
-        </section>
-    </main>
+            <div id="store-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+        </div>
+    </section>
 
-    <div id="cart-badge" class="cart-badge">
-        <button onclick="toggleModal(true)" class="btn-gradient px-10 py-5 rounded-full shadow-[0_15px_40px_rgba(255,156,0,0.3)] flex items-center gap-4">
-            <div class="bg-black text-[#ff9c00] w-7 h-7 rounded-full flex items-center justify-center font-bold" id="cart-count">0</div>
-            <span>مراجعة الطلبات</span>
-            <i class="fas fa-shopping-basket text-xl"></i>
-        </button>
-    </div>
+    <section id="adminLoginPage" class="page items-center justify-center px-6">
+        <div class="w-full max-w-sm glass p-10 rounded-[45px] text-center">
+            <h2 class="text-red-500 font-bold mb-8 italic tracking-widest underline">إدارة رشة فودز</h2>
+            <input type="tel" id="admin-user" placeholder="رقم المدير" class="!mb-4 pr-4">
+            <input type="password" id="admin-pass" placeholder="كلمة السر" class="!mb-6 pr-4">
+            <button onclick="handleAdminLogin()" class="w-full py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700">دخول المدير</button>
+            <button onclick="showPage('loginPage')" class="mt-6 text-xs text-gray-500 underline">رجوع</button>
+        </div>
+    </section>
 
-    <div id="orderModal">
-        <div class="modal-content p-8 relative">
-            <button onclick="toggleModal(false)" class="absolute top-6 left-6 text-gray-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-            <h2 class="text-2xl font-bold mb-6 text-[#ff9c00] flex items-center gap-2 italic">
-                <i class="fas fa-receipt"></i> قائمة طلبك
-            </h2>
-            
-            <div id="modal-items" class="mb-8 overflow-y-auto max-h-[45vh] pr-2 scroll-custom">
+    <section id="adminDashboard" class="page px-6">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="grid lg:grid-cols-3 gap-10">
+                <div class="glass p-8 rounded-[35px] h-fit">
+                    <h3 class="font-bold mb-6 neon-orange">إضافة منتج جديد</h3>
+                    <input type="text" id="p-name" placeholder="اسم المنتج" class="pr-4">
+                    <p class="text-[10px] text-gray-500 mb-2 mt-2">صورة البرطمان:</p>
+                    <input type="file" id="p-img-jar" class="text-xs mb-4">
+                    <p class="text-[10px] text-gray-500 mb-2">صورة الكيس:</p>
+                    <input type="file" id="p-img-bag" class="text-xs mb-6">
+                    <button id="add-btn" onclick="addProduct()" class="btn-premium w-full py-4">نشر في المتجر</button>
                 </div>
-
-            <div class="border-t border-white/10 pt-6">
-                <button onclick="sendFinalOrder()" class="btn-gradient w-full py-4 rounded-2xl text-lg flex items-center justify-center gap-3">
-                    إرسال الطلب عبر واتساب <i class="fab fa-whatsapp text-2xl"></i>
-                </button>
-                <button onclick="toggleModal(false)" class="w-full mt-4 text-gray-500 text-xs hover:text-[#ff9c00] transition">إضافة المزيد من المنتجات</button>
+                <div id="admin-items-list" class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-6"></div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <footer class="py-20 text-center bg-[#050505] border-t border-white/5 px-6">
-        <div class="text-[#ff9c00] text-2xl font-black italic mb-10 tracking-widest uppercase">RASHE FOODS</div>
-        <div class="flex flex-col items-center gap-4">
-            <span class="text-[9px] text-gray-600 tracking-[6px] uppercase font-bold">Project Developed By</span>
-            <a href="https://www.facebook.com/abdelrahman.ahmed.448790/" target="_blank" class="flex items-center gap-5 glass px-10 py-5 rounded-3xl border border-white/5 hover:border-[#1877f2] transition-all group shadow-2xl">
-                <div class="w-12 h-12 bg-[#1877f2] rounded-full flex items-center justify-center text-xl group-hover:scale-110 transition shadow-lg shadow-blue-500/20">
-                    <i class="fab fa-facebook-f text-white"></i>
-                </div>
-                <div class="text-right">
-                    <p class="text-white font-bold text-lg leading-tight">Abdelrahman Ahmed</p>
-                    <p class="text-[10px] text-gray-500 uppercase font-medium tracking-tighter">Web & UI Solutions Specialist</p>
-                </div>
-            </a>
-            <p class="mt-8 text-gray-700 text-[10px]">© 2026 جميع الحقوق محفوظة لشركة رشة فودز</p>
+    <div id="cartModal" class="fixed inset-0 bg-black/95 z-[2000] hidden items-center justify-center p-6">
+        <div class="w-full max-w-md glass p-8 rounded-[40px] border-orange-500/20">
+            <h2 class="text-2xl font-black mb-6 italic neon-orange">سلّتك الحالية</h2>
+            <div id="cart-items" class="space-y-4 mb-8 max-h-[350px] overflow-y-auto pr-2"></div>
+            <button onclick="checkout()" class="btn-premium w-full py-5 text-lg">إرسال الطلب (واتساب) <i class="fab fa-whatsapp ml-2"></i></button>
+            <button onclick="toggleCart(false)" class="w-full mt-4 text-gray-500 text-sm">إستكمال التسوق</button>
         </div>
-    </footer>
+    </div>
 
     <script>
         let cart = [];
+        let activeUser = JSON.parse(localStorage.getItem('rasha_session')) || null;
 
-        const blends = [
-            "توابل دجاج", "توابل كفتة", "توابل كبدة", "بهارات أرز بسمتي", 
-            "السبع بهارات", "حواوشي", "شاورما دجاج", "شاورما لحم", 
-            "بهارات سمك", "توابل محشي", "توابل برجر", "بهارات كبسة"
-        ];
-
-        const spices = [
-            "بابريكا مدخنة", "كركم نقي", "كاري هندي", "ثوم بودرة", 
-            "بصل بودرة", "كمون بلدي", "كزبرة ناشفة", "فلفل أسود", 
-            "زعتر سوري", "سماق", "جنزبيل", "قرفة مطحونة", "شطة نار", "حبهان"
-        ];
-
-        function renderItems(list, gridId, prefix, isOrange) {
-            const grid = document.getElementById(gridId);
-            list.forEach((item, i) => {
-                grid.innerHTML += `
-                    <div class="product-card p-6 text-right">
-                        <h3 class="text-xl font-bold mb-6 ${isOrange ? 'text-[#ff9c00]' : 'text-white'}">${item}</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">نوع التعبئة</label>
-                                <select id="${prefix}-t-${i}" class="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs outline-none focus:border-[#ff9c00]">
-                                    <option>برطمان</option><option>كيس</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">الوزن المطلوب (جرام)</label>
-                                <input type="number" id="${prefix}-w-${i}" placeholder="مثال: 125" class="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs outline-none focus:border-[#ff9c00]">
-                            </div>
-                            <button onclick="addToCart('${item}', '${prefix}-t-${i}', '${prefix}-w-${i}')" 
-                                    class="w-full bg-white text-black py-3 rounded-xl text-xs font-black uppercase hover:bg-[#ff9c00] transition">
-                                إضافة للسلة
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
+            if(id === 'storePage') loadProducts();
+            if(id === 'adminDashboard') loadAdminItems();
+            window.scrollTo(0,0);
         }
 
-        renderItems(blends, 'blends-grid', 'b', true);
-        renderItems(spices, 'spices-grid', 's', false);
-
-        function addToCart(name, tId, wId) {
-            const type = document.getElementById(tId).value;
-            const weight = document.getElementById(wId).value;
-            if(!weight || weight <= 0) return alert("من فضلك أدخل الوزن");
+        // --- AUTH ---
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value, phone = document.getElementById('reg-phone').value,
+                  addr = document.getElementById('reg-address').value, pass = document.getElementById('reg-pass').value;
+            if(!name || !phone || !addr || !pass) return alert("يرجى تعبئة كافة البيانات");
             
-            cart.push({ id: Date.now(), name, type, weight });
-            updateCartBadge();
-            document.getElementById(wId).value = ''; // تصفير الخانة بعد الإضافة
+            fb.set(fb.ref(fb.db, 'users/' + phone), { name, phone, addr, pass }).then(() => {
+                alert("تم إنشاء حسابك بنجاح!");
+                showPage('loginPage');
+            });
         }
 
-        function updateCartBadge() {
-            const badge = document.getElementById('cart-badge');
-            const count = document.getElementById('cart-count');
-            badge.style.display = cart.length > 0 ? 'block' : 'none';
-            count.innerText = cart.length;
+        function handleLogin() {
+            const phone = document.getElementById('log-phone').value, pass = document.getElementById('log-pass').value;
+            fb.onValue(fb.ref(fb.db, 'users/' + phone), (snap) => {
+                const user = snap.val();
+                if(user && user.pass === pass) {
+                    activeUser = user;
+                    localStorage.setItem('rasha_session', JSON.stringify(user));
+                    loginSuccess();
+                } else { alert("بيانات الدخول غير صحيحة"); }
+            }, { onlyOnce: true });
         }
 
-        function toggleModal(show) {
-            const modal = document.getElementById('orderModal');
-            modal.style.display = show ? 'flex' : 'none';
-            if(show) renderModalItems();
+        function loginSuccess() {
+            document.getElementById('welcome-msg').innerHTML = `قائمة المنتجات | أهلاً <span class="neon-orange">${activeUser.name}</span>`;
+            document.getElementById('logout-btn').classList.remove('hidden');
+            showPage('storePage');
         }
 
-        function renderModalItems() {
-            const container = document.getElementById('modal-items');
-            container.innerHTML = cart.length === 0 ? '<p class="text-center text-gray-600 py-10">السلة فارغة حالياً</p>' : '';
+        function logout() { localStorage.removeItem('rasha_session'); location.reload(); }
+
+        function handleAdminLogin() {
+            if(document.getElementById('admin-user').value === "01200929551" && 
+               document.getElementById('admin-pass').value === "132006") showPage('adminDashboard');
+            else alert("غير مسموح لك بالدخول");
+        }
+
+        // --- STORE & CLOUD ---
+        async function addProduct() {
+            const btn = document.getElementById('add-btn');
+            const name = document.getElementById('p-name').value;
+            const jarF = document.getElementById('p-img-jar').files[0];
+            const bagF = document.getElementById('p-img-bag').files[0];
+            if(!name || !jarF || !bagF) return alert("يرجى رفع صور البرطمان والكيس");
+
+            btn.innerText = "جاري الرفع..."; btn.disabled = true;
+            const toB64 = (f) => new Promise(r => { const rd = new FileReader(); rd.readAsDataURL(f); rd.onload = () => r(rd.result); });
             
-            cart.forEach((item, index) => {
-                container.innerHTML += `
-                    <div class="cart-item flex justify-between items-center bg-white/5 mb-2 px-4 rounded-xl border border-white/5">
-                        <div class="text-right">
-                            <p class="font-bold text-sm text-white">${item.name}</p>
-                            <p class="text-[10px] text-gray-400">${item.type} • ${item.weight} جرام</p>
+            const productData = {
+                id: Date.now(),
+                name: name,
+                jarImg: await toB64(jarF),
+                bagImg: await toB64(bagF)
+            };
+
+            fb.push(fb.ref(fb.db, 'products'), productData).then(() => {
+                alert("تم إضافة المنتج للمتجر بنجاح");
+                btn.innerText = "نشر في المتجر"; btn.disabled = false;
+                loadAdminItems();
+            });
+        }
+
+        function loadProducts() {
+            fb.onValue(fb.ref(fb.db, 'products'), (snapshot) => {
+                const data = snapshot.val();
+                const grid = document.getElementById('store-grid');
+                grid.innerHTML = "";
+                if(!data) return grid.innerHTML = "<p class='col-span-full text-center opacity-30'>المتجر فارغ حالياً</p>";
+                
+                Object.values(data).forEach((p, i) => {
+                    grid.innerHTML += `
+                        <div class="item-card shadow-2xl">
+                            <img id="v-${i}" src="${p.jarImg}" class="w-full h-52 object-cover">
+                            <div class="p-6">
+                                <h3 class="font-bold text-lg mb-4 text-right">${p.name}</h3>
+                                <div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
+                                    <button onclick="switchImg(${i},'${p.jarImg}',this)" class="type-btn-${i} flex-1 py-2 rounded-lg text-[10px] font-bold bg-[#ff9c00] text-black">برطمان</button>
+                                    <button onclick="switchImg(${i},'${p.bagImg}',this)" class="type-btn-${i} flex-1 py-2 rounded-lg text-[10px] text-gray-400">كيس</button>
+                                </div>
+                                <input type="number" id="qty-${i}" placeholder="الوزن بالجرام" class="text-center !mb-4">
+                                <button onclick="addToCart('${p.name}', ${i})" class="btn-premium w-full py-3 text-xs">إضافة للطلب</button>
+                            </div>
+                        </div>`;
+                });
+            });
+        }
+
+        function switchImg(idx, img, btn) {
+            document.getElementById(`v-${idx}`).src = img;
+            document.querySelectorAll(`.type-btn-${idx}`).forEach(b => {
+                b.classList.remove('bg-[#ff9c00]', 'text-black');
+                b.classList.add('text-gray-400');
+            });
+            btn.classList.add('bg-[#ff9c00]', 'text-black');
+            btn.classList.remove('text-gray-400');
+        }
+
+        function addToCart(name, idx) {
+            const weight = document.getElementById(`qty-${idx}`).value;
+            if(!weight || weight <= 0) return alert("يرجى تحديد الوزن أولاً");
+            const type = [...document.querySelectorAll(`.type-btn-${idx}`)].find(b => b.classList.contains('text-black')).innerText;
+            
+            cart.push({ id: Date.now(), name, weight, type });
+            updateCartUI();
+            document.getElementById(`qty-${idx}`).value = '';
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-badge').innerText = cart.length;
+            document.getElementById('floating-cart').style.display = cart.length > 0 ? 'flex' : 'none';
+        }
+
+        function toggleCart(show) {
+            document.getElementById('cartModal').style.display = show ? 'flex' : 'none';
+            if(show) {
+                const container = document.getElementById('cart-items');
+                container.innerHTML = cart.map((item, i) => `
+                    <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                        <div>
+                            <p class="font-bold text-orange-500">${item.name}</p>
+                            <p class="text-[10px] text-gray-500">${item.type} | ${item.weight} جرام</p>
                         </div>
-                        <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-400 p-2 transition">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                `;
-            });
+                        <button onclick="cart.splice(${i},1); updateCartUI(); toggleCart(true)" class="text-red-500 bg-red-500/10 w-8 h-8 rounded-full">×</button>
+                    </div>`).join('');
+                if(cart.length === 0) toggleCart(false);
+            }
         }
 
-        function removeItem(index) {
-            cart.splice(index, 1);
-            renderModalItems();
-            updateCartBadge();
-            if(cart.length === 0) toggleModal(false);
-        }
-
-        function sendFinalOrder() {
-            let msg = `مرحباً رشة فودز.. أريد طلب الأصناف التالية:%0a%0a`;
-            cart.forEach((item, i) => {
-                msg += `${i+1}- *${item.name}* (${item.type}) ⚖️ الوزن: ${item.weight} جرام%0a`;
-            });
-            msg += `%0aشكراً جزيلاً!`;
+        function checkout() {
+            const userAddr = activeUser.addr || activeUser.address || "غير مسجل";
+            let msg = `طلب جديد من رشة فودز 🌶️%0a👤 العميل: ${activeUser.name}%0a📞 الهاتف: ${activeUser.phone}%0a📍 العنوان: ${userAddr}%0a%0a*الطلبات:*%0a`;
+            cart.forEach((c, i) => msg += `${i+1}. ${c.name} (${c.type}) : ${c.weight} جم%0a`);
             window.open(`https://wa.me/201021407878?text=${msg}`);
         }
 
-        function orderStand() {
-            const list = document.getElementById('stand-input').value;
-            if(!list) return alert("من فضلك اكتب الأصناف");
-            const msg = `مرحباً رشة فودز.. أريد طلب:%0a📦 *إستاند ورقي كامل*%0a🔢 25 عبوة (40 جرام)%0a🌿 الأصناف: ${list}`;
-            window.open(`https://wa.me/201021407878?text=${msg}`);
+        function loadAdminItems() {
+            fb.onValue(fb.ref(fb.db, 'products'), (snap) => {
+                const data = snap.val();
+                const list = document.getElementById('admin-items-list');
+                list.innerHTML = "";
+                if(!data) return;
+                Object.entries(data).forEach(([key, p]) => {
+                    list.innerHTML += `
+                        <div class="glass p-3 rounded-2xl relative text-center border-white/5">
+                            <img src="${p.jarImg}" class="h-16 w-full object-cover rounded-xl mb-1 shadow-md">
+                            <p class="text-[9px] font-bold truncate">${p.name}</p>
+                            <button onclick="fb.remove(fb.ref(fb.db, 'products/${key}'))" class="absolute -top-2 -right-2 bg-red-600 w-6 h-6 rounded-full shadow-lg">×</button>
+                        </div>`;
+                });
+            });
         }
+
+        window.onload = () => { if(activeUser) loginSuccess(); };
     </script>
 </body>
-</html>
+</html>س
